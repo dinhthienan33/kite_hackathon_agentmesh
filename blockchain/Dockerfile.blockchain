@@ -1,0 +1,12 @@
+FROM node:20-alpine
+
+WORKDIR /usr/src/app
+
+# Dockerfile này đóng vai trò là một "vỏ bọc mỏng" để chạy script entrypoint.sh 
+# Nó sẽ sử dụng toàn bộ code và node_modules được mount qua Volume của docker-compose
+# Điều này giúp loại bỏ hoàn toàn các lỗi npm install hoặc apk add do mạng/tài nguyên
+
+EXPOSE 8545
+
+# Permissions sẽ được kế thừa từ host mount
+ENTRYPOINT ["sh", "./entrypoint.sh"]

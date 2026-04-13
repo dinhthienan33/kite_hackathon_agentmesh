@@ -1,0 +1,62 @@
+services:
+  # 1. Local Blockchain Node (Hardhat) - Automated for Local Simulation
+  blockchain:
+    build:
+      context: ./blockchain
+      dockerfile: Dockerfile.blockchain
+    container_name: agentmesh-chain
+    ports:
+      - "8545:8545"
+    volumes:
+      - ./blockchain:/usr/src/app
+      - ./.env:/usr/src/app/.env
+      - ./blockchain/compilers-cache:/root/.cache/hardhat-nodejs
+    healthcheck:
+      test: ["CMD-SHELL", "node -e 'require(\"net\").createConnection(8545, \"localhost\").on(\"error\", () => process.exit(1)).on(\"connect\", () => process.exit(0))'"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+  # 2. Node.js Frontend & AA Microservice
+  agentmesh-node:
+    build: 
+      context: .
+      dockerfile: Dockerfile.node
+    container_name: agentmesh-node
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./src:/usr/src/app/src
+      - ./server:/usr/src/app/server
+      - ./.env:/usr/src/app/.env
+    environment:
+      - NODE_ENV=development
+      - KITE_TESTNET_RPC=http://agentmesh-chain:8545
+      - KITE_BUNDLER_URL=local_mocked_bundler
+    depends_on:
+      blockchain:
+        condition: service_healthy
+
+  # 3. Python FastAPI Orchestrator  
+  agentmesh-python:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile.python
+    container_name: agentmesh-python
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./Backend/app:/usr/src/app/app
+      - ./.env:/usr/src/app/.env
+    env_file:
+      - .env
+    environment:
+      - AA_SERVICE_URL=http://agentmesh-node:3000
+      - KITE_RPC_URL=http://agentmesh-chain:8545
+      - KITE_CHAIN_ID=31337
+    depends_on:
+      agentmesh-node:
+        condition: service_started
+      blockchain:
+        condition: service_healthy
