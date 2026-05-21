@@ -14,8 +14,11 @@ async function main() {
   const network = await ethers.provider.getNetwork();
   console.log(`Connected to network: ${network.name} (Chain ID: ${network.chainId})`);
 
-  // Bypass balance check for local simulation
-  if (network.chainId !== 2368 && balance === 0n) {
+  const balance = await ethers.provider.getBalance(deployer.address);
+  console.log(`Account balance: ${ethers.formatEther(balance)} KITE`);
+
+  // Check funds on Kite Testnet
+  if (network.chainId === 2368n && balance === 0n) {
     console.error("❌ INSUFFICIENT FUNDS! You need test KITE tokens to deploy.");
     console.error("   ➡️  Go to https://faucet.gokite.ai to claim tokens.\n");
     process.exit(1);
@@ -75,7 +78,7 @@ async function main() {
   updateEnv("AGENT_REGISTRY_ADDRESS", registryAddress);
   updateEnv("AGENT_ESCROW_ADDRESS", escrowAddress);
   updateEnv("USE_MOCK_CHAIN", "false");
-  updateEnv("KITE_RPC_URL", "http://agentmesh-chain:8545");
+  updateEnv("KITE_RPC_URL", "https://rpc-testnet.gokite.ai");
 
   fs.writeFileSync(envPath, envContent);
   console.log("✅ .env file updated successfully.");

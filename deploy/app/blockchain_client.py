@@ -30,6 +30,9 @@ class KiteChainClient:
 
         # Initialize Web3
         self.w3 = AsyncWeb3(AsyncWeb3.AsyncHTTPProvider(settings.KITE_RPC_URL))
+        from web3.middleware import ExtraDataToPOAMiddleware
+        self.w3.middleware_onion.inject(ExtraDataToPOAMiddleware, layer=0)
+        
         self.account = Account.from_key(settings.KITE_PRIVATE_KEY)
         self.chain_id = settings.KITE_CHAIN_ID
         
@@ -56,11 +59,6 @@ class KiteChainClient:
         # Estimate gas
         gas_estimate = await self.w3.eth.estimate_gas(tx_build)
         tx_build["gas"] = int(gas_estimate * 1.5)  # Add 50% buffer
-        
-        # We fetch the current gas price
-        gas_price = await self.w3.eth.gas_price
-        tx_build["gasPrice"] = gas_price
-        
         signed_tx = self.w3.eth.account.sign_transaction(tx_build, private_key=self.account.key)
         tx_hash = await self.w3.eth.send_raw_transaction(signed_tx.raw_transaction)
         
@@ -88,8 +86,8 @@ class KiteChainClient:
         """Finds agents by querying 'Registered' events from the AgentRegistry contract on-chain"""
         if self.use_mock:
             return [
-                {"id": "0xEfA7eCa1cd0A222dDec0192D574f5d97B41E8874", "name": "PixelForge AI", "role": "Designer", "baseRate": 5.0},
-                {"id": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8", "name": "DeepSearch AI", "role": "Researcher", "baseRate": 2.0},
+                {"id": "0xEfA7eCa1cd0A222dDec0192D574f5d97B41E8874", "name": "PixelForge AI", "role": "Designer", "baseRate": 0.05},
+                {"id": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8", "name": "DeepSearch AI", "role": "Researcher", "baseRate": 0.02},
             ]
         
         try:
@@ -124,16 +122,16 @@ class KiteChainClient:
             if not registered_agents:
                 logger.warning("No on-chain registered agents found. Falling back to default list.")
                 return [
-                    {"id": "0xEfA7eCa1cd0A222dDec0192D574f5d97B41E8874", "name": "PixelForge AI", "role": "Designer", "baseRate": 5.0},
-                    {"id": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8", "name": "DeepSearch AI", "role": "Researcher", "baseRate": 2.0},
+                    {"id": "0xEfA7eCa1cd0A222dDec0192D574f5d97B41E8874", "name": "PixelForge AI", "role": "Designer", "baseRate": 0.05},
+                    {"id": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8", "name": "DeepSearch AI", "role": "Researcher", "baseRate": 0.02},
                 ]
             
             return list(registered_agents.values())
         except Exception as e:
             logger.error(f"Error querying on-chain agents: {e}. Falling back to default list.")
             return [
-                {"id": "0xEfA7eCa1cd0A222dDec0192D574f5d97B41E8874", "name": "PixelForge AI", "role": "Designer", "baseRate": 5.0},
-                {"id": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8", "name": "DeepSearch AI", "role": "Researcher", "baseRate": 2.0},
+                {"id": "0xEfA7eCa1cd0A222dDec0192D574f5d97B41E8874", "name": "PixelForge AI", "role": "Designer", "baseRate": 0.05},
+                {"id": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8", "name": "DeepSearch AI", "role": "Researcher", "baseRate": 0.02},
             ]
 
     async def lock_escrow(self, task_id: bytes, amount_usdc: float) -> str:

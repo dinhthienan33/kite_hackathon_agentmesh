@@ -24,11 +24,11 @@ export default defineConfig(({mode}) => {
       hmr: process.env.DISABLE_HMR !== 'true',
       proxy: {
         '/api': {
-          target: 'http://agentmesh-python:8000',
+          target: 'http://localhost:8000',
           changeOrigin: true,
         },
         '/events': {
-          target: 'http://agentmesh-python:8000',
+          target: 'http://localhost:8000',
           changeOrigin: true,
         },
       },

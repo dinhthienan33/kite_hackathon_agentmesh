@@ -32,8 +32,8 @@ services:
       - ./.env:/usr/src/app/.env
     environment:
       - NODE_ENV=development
-      - KITE_TESTNET_RPC=http://agentmesh-chain:8545
-      - KITE_BUNDLER_URL=local_mocked_bundler
+      - KITE_TESTNET_RPC=https://rpc-testnet.gokite.ai
+      - KITE_BUNDLER_URL=https://bundler-service.staging.gokite.ai/rpc/
     depends_on:
       blockchain:
         condition: service_healthy
@@ -53,10 +53,8 @@ services:
       - .env
     environment:
       - AA_SERVICE_URL=http://agentmesh-node:3000
-      - KITE_RPC_URL=http://agentmesh-chain:8545
-      - KITE_CHAIN_ID=31337
+      - KITE_RPC_URL=https://rpc-testnet.gokite.ai
+      - KITE_CHAIN_ID=2368
     depends_on:
-      agentmesh-node:
-        condition: service_started
       blockchain:
         condition: service_healthy
