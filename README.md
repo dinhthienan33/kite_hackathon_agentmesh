@@ -6,7 +6,7 @@
 
 **Autonomous multi-agent marketplace on Kite AI — discover workers on-chain, negotiate with LLMs, escrow funds, and settle gaslessly.**
 
-[Portfolio](https://portfolio.dinhthienan203.id.vn) · [Kite AI Global Hackathon 2026](https://encode.club) · Agentic Commerce track
+[Portfolio](https://portfolio.dinhthienan203.id.vn) · Kite AI Global Hackathon 2026 · Agentic Commerce track
 
 </div>
 
